@@ -1,8 +1,7 @@
 import http from 'k6/http';
 import { check } from 'k6';
 
-// LEER CSV EN EL ÁMBITO GLOBAL (FUERA DE FUNCIONES)
-const csvPath = "C:\\k6-project\\users.csv"; // ⚠️ Usa ESTA ruta
+const csvPath = "C:\\k6-project\\users.csv";
 const csvContent = open(csvPath, 'r');
 const csvLines = csvContent.split(/\r?\n/).filter(line => line.trim() !== '');
 const users = csvLines.slice(1).map(line => {
@@ -20,11 +19,9 @@ export let options = {
 };
 
 export default function () {
-  // Obtener usuario de la iteración actual
   const index = __VU % users.length;
   const { user, passwd } = users[index];
 
-  // Realizar la petición
   const payload = JSON.stringify({ 
     username: user, 
     password: passwd 
@@ -33,9 +30,9 @@ export default function () {
   const headers = { 'Content-Type': 'application/json' };
   const res = http.post('https://fakestoreapi.com/auth/login', payload, { headers });
 
-  // Validaciones
   check(res, {
     'Login exitoso': (r) => r.status === 200,
     'Tiempo < 1.5s': (r) => r.timings.duration < 1500
   });
+
 }
